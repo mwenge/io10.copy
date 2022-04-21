@@ -4,16 +4,20 @@ import * as storage from "./storage.js";
 const defaultData = 
   {
     program: `# Keyboard Commands.
-#  Current Pipeline
+#  Current Step
 #    - Ctrl-Enter: Run the current step.
+#    - Ctrl-D: Interrupt execution (Python, R, and SQL only)
+#
+#  Current Pipeline
 #    - Alt-R: Run the entire pipeline from the start.
 #    - Alt-Left: Navigate to the previous step in the pipeline.
 #    - Alt-Right: Navigate to the next step in the pipeline.
-#    - Alt-A: Add a new step to a pipeline.
-#    - Alt-D: Delete the current step from a pipeline.
-#    - Ctrl-O: Add a file to the current step in the pipeline.
+#    - Alt-A: Add a new step after the current one.
+#    - Alt-B: Add a new step before the current one.
+#    - Alt-C: Delete the current step.
+#    - Ctrl-O: Add a file to the current step.
 #
-#  Input/Output
+#  When Cursor in Input/Output panes
 #    - PageUp/PageDown: Page up and down through input/output.
 #    - Ctrl-Home: Move back to start of input/output
 #
@@ -21,6 +25,26 @@ const defaultData =
 #    - Alt-Up: Create a new pipeline or navigate to the next pipeline.
 #    - Alt-Down: Navigate to the previous pipeline.
 #    - Click on the pipeline name in the bottom left to give it a meaningful name of your own.
+#
+#  Language Detection
+#  io10.dev will automatically detect the language you're using, most of the time.
+#  For short one-liners, you can force language detection by using a 'shebang' on the
+#  first line of the script, e.g.:
+#
+#    #!/bin/python
+#    x = 9
+#    print(x)
+#
+#  The available shebangs are:
+#
+#    #!/bin/python
+#    #!/bin/py
+#    #!/bin/javascript
+#    #!/bin/js
+#    #!/bin/sql
+#    #!/bin/r
+#    #!/bin/lua
+
 
 import sys
 w = sys.stdin.readline();
@@ -31,13 +55,17 @@ for i in range(0,20):
     input: ``,
     output: '',
     lang: "*.py",
-    files: [],
   };
 
 async function getPipe(prevID, id) {
   let data = await storage.getData(id);
   if (!data) {
-    data = {...defaultData};
+    data = {};
+    data.program = defaultData.program;
+    data.input = defaultData.input;
+    data.output = defaultData.output;
+    data.lang = defaultData.lang;
+    data.files = [];
     storage.setData(id, data);
   }
   const rangeIterator = {
